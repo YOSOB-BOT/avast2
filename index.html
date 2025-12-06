@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افاست AVAST - منصة الحماية المميزة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a0a; color: #f5f5f5; line-height: 1.6; overflow-x: hidden; }
+        
+        /* شاشة اختيار الجهاز */
+        #device-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        
+        .device-selection-container {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 2px solid #6a11cb;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .device-selection-container h2 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to left, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .device-selection-container p {
+            color: #aaa;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+        
+        .device-options {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .device-option {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 200px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #333;
+        }
+        
+        .device-option:hover {
+            transform: translateY(-10px);
+            border-color: #6a11cb;
+            box-shadow: 0 10px 25px rgba(106, 17, 203, 0.3);
+        }
+        
+        .device-option i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #6a11cb;
+        }
+        
+        .device-option h3 {
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .device-option p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        
+        .device-option.phone i { color: #25D366; }
+        .device-option.desktop i { color: #2575fc; }
+        
+        /* زر التخطي */
+        .skip-selection {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #333;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        
+        .skip-selection:hover {
+            color: #fff;
+            border-color: #6a11cb;
+        }
+        
+        /* إخفاء المحتوى الرئيسي */
+        #main-content {
+            display: none;
+        }
+        
+        /* زر تبديل العرض */
+        .view-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* Header & Navigation */
+        header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6a11cb; position: sticky; top: 0; z-index: 1000; }
+        .logo { display: flex; align-items: center; }
+        .logo h1 { font-size: 1.8rem; background: linear-gradient(to left, #6a11cb, #2575fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 1px; }
+        .logo span { color: #ffd700; font-size: 1.5rem; margin-right: 5px; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; }
+        nav ul { display: flex; list-style: none; }
+        nav ul li { margin-right: 1.5rem; }
+        nav ul li a { color: #ddd; text-decoration: none; font-weight: 600; font-size: 1rem; transition: color 0.3s; padding: 0.5rem 0; }
+        nav ul li a:hover { color: #6a11cb; border-bottom: 2px solid #6a11cb; }
+        
+        /* Hero Section */
+        .hero { padding: 6rem 5%; text-align: center; background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 100%); }
+        .hero h2 { font-size: 2.5rem; margin-bottom: 1.5rem; background: linear-gradient(to left, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero .highlight { background: linear-gradient(45deg, #6a11cb, #2575fc); padding: 0.5rem 1.5rem; border-radius: 30px; display: inline-block; margin-bottom: 1.5rem; font-weight: bold; font-size: 0.9rem; }
+        .hero p { font-size: 1.1rem; max-width: 800px; margin: 0 auto 2rem; color: #aaa; }
+        .cta-button { display: inline-block; background: linear-gradient(to left, #6a11cb, #2575fc); color: white; padding: 0.8rem 1.8rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1rem; letter-spacing: 1px; transition: transform 0.3s, box-shadow 0.3s; margin: 0.3rem; }
+        .cta-button:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(106, 17, 203, 0.5); }
+        .cta-button.gold { background: linear-gradient(to left, #ffd700, #ffed4e); color: #000; }
+        .cta-button.telegram { background: linear-gradient(to left, #0088cc, #1da1f2); }
+        
+        /* Introduction Section */
+        .intro { padding: 3rem 5%; text-align: center; background: rgba(26, 26, 46, 0.5); margin: 2rem 0; border-top: 1px solid #333; border-bottom: 1px solid #333; }
+        .intro h3 { font-size: 1.8rem; color: #ffd700; margin-bottom: 1rem; }
+        .intro p { max-width: 900px; margin: 0 auto; font-size: 1rem; color: #ccc; }
+        
+        /* Packages Section - تصميم الحاسوب */
+        .packages { padding: 4rem 5%; }
+        .packages-title { text-align: center; margin-bottom: 3rem; }
+        .packages-title h2 { font-size: 2.2rem; color: #ffd700; margin-bottom: 1rem; }
+        .packages-title p { color: #aaa; max-width: 800px; margin: 0 auto; font-size: 1rem; }
+        
+        /* Packages Grid - تصميم الحاسوب */
+        .packages-grid.desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+        
+        /* Packages Slider - تصميم الهاتف */
+        .packages-slider.mobile { position: relative; overflow: hidden; padding: 1rem 0; }
+        .slider-wrapper { display: flex; transition: transform 0.3s ease; }
+        .slider-controls { display: flex; justify-content: center; align-items: center; margin-top: 2rem; }
+        .slider-btn { background: rgba(106, 17, 203, 0.3); border: 2px solid #6a11cb; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; margin: 0 0.5rem; }
+        .slider-btn:hover { background: #6a11cb; }
+        .slider-dots { display: flex; justify-content: center; margin-top: 1rem; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #333; margin: 0 5px; cursor: pointer; transition: background 0.3s; }
+        .dot.active { background: #6a11cb; }
+        
+        /* Package Card */
+        .package-card { background: rgba(26, 26, 46, 0.8); border-radius: 15px; padding: 1.8rem; border: 1px solid #333; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .package-card:hover { transform: translateY(-10px); border-color: #6a11cb; box-shadow: 0 15px 30px rgba(106, 17, 203, 0.2); }
+        .package-card.featured { border: 2px solid #ffd700; }
+        .package-card.featured::before { content: "الأكثر طلباً"; position: absolute; top: 15px; left: 15px; background: #ffd700; color: #000; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .package-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 1rem; }
+        .package-name { font-size: 1.6rem; color: #ffd700; }
+        .package-price { font-size: 1.4rem; font-weight: bold; color: #6a11cb; }
+        .package-price .currency { font-size: 0.9rem; color: #aaa; }
+        .package-specs { margin-bottom: 1.5rem; }
+        .spec-item { display: flex; justify-content: space-between; margin-bottom: 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #333; }
+        .spec-label { color: #aaa; }
+        .spec-value { color: #ffd700; font-weight: bold; }
+        .package-features { margin-bottom: 1.5rem; }
+        .feature-item { display: flex; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .feature-item i { color: #00ff00; margin-left: 0.5rem; }
+        .package-button { text-align: center; }
+        
+        /* Quick Contact Section */
+        .quick-contact { padding: 3rem 5%; background: rgba(26, 26, 46, 0.3); text-align: center; }
+        .quick-contact h2 { color: #ffd700; margin-bottom: 2rem; font-size: 2rem; }
+        .quick-contact p { color: #aaa; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .contact-buttons.desktop { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
+        .contact-buttons.mobile { display: flex; flex-direction: column; gap: 1.5rem; max-width: 400px; margin: 0 auto; }
+        .telegram-btn { display: flex; align-items: center; justify-content: center; background: linear-gradient(45deg, #0088cc, #1da1f2); color: white; padding: 1.2rem; border-radius: 15px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: all 0.3s; flex-direction: column; }
+        .telegram-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 136, 204, 0.4); }
+        .telegram-btn i { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .telegram-btn .contact-name { font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem; }
+        .whatsapp-btn { background: linear-gradient(45deg, #25D366, #128C7E); }
+        
+        /* Contact Section */
+        .contact { padding: 4rem 5%; background: rgba(26, 26, 46, 0.5); text-align: center; }
+        .contact h2 { font-size: 2.2rem; color: #ffd700; margin-bottom: 1rem; }
+        .contact-container.desktop { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .contact-container.mobile { display: flex; flex-direction: column; gap: 2rem; margin-top: 3rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+        .contact-card { background: rgba(26, 26, 46, 0.8); border-radius: 15px; padding: 2rem; border: 1px solid #333; }
+        .contact-card h3 { color: #ffd700; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .contact-person { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #333; }
+        .contact-person:last-child { margin-bottom: 0; border-bottom: none; }
+        .person-name { font-weight: bold; color: #ffd700; margin-bottom: 0.5rem; }
+        .person-contact { display: flex; align-items: center; justify-content: center; margin-top: 0.8rem; }
+        .person-contact i { color: #6a11cb; margin-left: 0.5rem; }
+        .payment-methods { margin-top: 2rem; }
+        .payment-methods h4 { color: #ffd700; margin-bottom: 1rem; }
+        .payment-item { display: inline-block; background: rgba(106, 17, 203, 0.2); padding: 0.5rem 1rem; border-radius: 10px; margin: 0.3rem; border: 1px solid #6a11cb; font-size: 0.9rem; }
+        .avast-border { color: #ffd700; margin: 1.5rem 0; font-size: 1.2rem; }
+        
+        /* Footer */
+        footer { background-color: #1a1a2e; padding: 3rem 5%; text-align: center; border-top: 1px solid #333; }
+        .avast-banner { background: linear-gradient(45deg, #1a1a2e, #16213e); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid #6a11cb; }
+        .avast-banner h3 { color: #ffd700; font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .avast-banner p { color: #aaa; }
+        footer p { color: #aaa; margin-bottom: 1rem; font-size: 0.9rem; }
+        .social-icons { margin-top: 1.5rem; }
+        .social-icons a { color: #ffd700; margin: 0 10px; font-size: 1.3rem; transition: color 0.3s; }
+        .social-icons a:hover { color: #6a11cb; }
+        
+        /* Responsive تلقائي */
+        @media (max-width: 768px) {
+            .device-options { flex-direction: column; align-items: center; }
+            .device-option { width: 100%; max-width: 300px; }
+            .device-selection-container { padding: 2rem; }
+            .device-selection-container h2 { font-size: 2rem; }
+            
+            /* Mobile Styles تلقائية */
+            body.mobile-view .menu-toggle { display: block; }
+            body.mobile-view nav ul { 
+                display: none; 
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                width: 100%;
+                flex-direction: column;
+                padding: 1rem 0;
+                border-top: 1px solid #6a11cb;
+                z-index: 1000;
+            }
+            body.mobile-view nav ul.active { display: flex; }
+            body.mobile-view nav ul li { margin: 0; text-align: center; }
+            body.mobile-view nav ul li a { display: block; padding: 1rem; }
+            body.mobile-view .cta-button { display: block; width: 90%; max-width: 300px; margin: 0.5rem auto; }
+            body.mobile-view .person-contact { justify-content: flex-start; }
+        }
+        
+        @media (min-width: 769px) {
+            /* Desktop Styles تلقائية */
+            body.desktop-view .menu-toggle { display: none; }
+            body.desktop-view nav ul { display: flex; }
+        }
+    </style>
+</head>
+<body class="desktop-view">
+    <!-- شاشة اختيار الجهاز -->
+    <div id="device-selection">
+        <div class="device-selection-container">
+            <h2>مرحباً بكم في افاست</h2>
+            <p>لتحسين تجربة العرض، يرجى اختيار نوع الجهاز الذي تستخدمه حالياً</p>
+            
+            <div class="device-options">
+                <div class="device-option phone" onclick="selectDevice('mobile')">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>هاتف محمول</h3>
+                    <p>تصميم مخصص للهواتف الذكية</p>
+                </div>
+                
+                <div class="device-option desktop" onclick="selectDevice('desktop')">
+                    <i class="fas fa-desktop"></i>
+                    <h3>كمبيوتر / لابتوب</h3>
+                    <p>تصميم مخصص للحواسيب</p>
+                </div>
+            </div>
+            
+            <a href="javascript:void(0)" class="skip-selection" onclick="selectDevice('auto')">تخطي والاستمرار تلقائياً</a>
+        </div>
+    </div>
+    
+    <!-- زر تبديل العرض -->
+    <button class="view-toggle" id="viewToggle" style="display: none;">
+        <i class="fas fa-exchange-alt"></i>
+        <span>تغيير العرض</span>
+    </button>
+    
+    <!-- المحتوى الرئيسي -->
+    <div id="main-content">
+        <header>
+            <div class="logo">
+                <h1><span>AVAST</span>افاست</h1>
+            </div>
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <nav>
+                <ul id="navMenu">
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#packages">الباقات</a></li>
+                    <li><a href="#quick-contact">اتصل بنا</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="hero" id="home">
+            <div class="highlight">تم افتتاح منصة افاست</div>
+            <h2>Avast for me, stardom..</h2>
+            <p>ثاني خطوه في بداية Avast for me, stardom.. ما هطول عليكم بالكلام لكم العروض بنفس مميزات أقوى منصة حالياً دون ذكر أسماء.. We're waiting for you with Avast.</p>
+            <a href="#packages" class="cta-button">عرض الباقات</a>
+            <a href="#quick-contact" class="cta-button gold">اشترك الآن</a>
+            <a href="https://t.me/qbk15" class="cta-button telegram" target="_blank"><i class="fab fa-telegram"></i> تواصل على تليجرام</a>
+        </section>
+
+        <div class="intro">
+            <h3>──◆𝐀𝐕𝐀𝐒𝐓◆──━──────────</h3>
+            <p>نقدم لكم باقات حصرية بمواصفات فائقة وأسعار تنافسية، مع دعم فني متكامل على مدار الساعة</p>
+        </div>
+
+        <section class="packages" id="packages">
+            <div class="packages-title">
+                <h2>باقات افاست الحصرية</h2>
+                <p>اختر الباقة التي تناسب احتياجاتك من بين باقاتنا المميزة</p>
+            </div>
+            
+            <!-- تصميم الحاسوب -->
+            <div class="packages-grid desktop" id="desktopPackages">
+                <!-- الباقة العادية -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">الباقة العادية</div>
+                        <div class="package-price">1.5$ <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">2</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">4096 MB</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> استجابة عالية</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> سرعة في التنفيذ</div>
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button">اشترك الآن</a>
+                    </div>
+                </div>
+                
+                <!-- الباقة الفضية -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">الباقة الفضية</div>
+                        <div class="package-price">2$ <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">4</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">8192 MB</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> استجابة عالية</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> سرعة في التنفيذ</div>
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button">اشترك الآن</a>
+                    </div>
+                </div>
+                
+                <!-- الباقة الذهبية -->
+                <div class="package-card featured">
+                    <div class="package-header">
+                        <div class="package-name">الباقة الذهبية</div>
+                        <div class="package-price">2.55$ <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">8</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">12288 MB</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> استجابة عالية</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> سرعة في التنفيذ</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> دعم فني على مدار اليوم</div>
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button gold">الخيار المثالي</a>
+                    </div>
+                </div>
+                
+                <!-- الباقة الفائقة -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">الباقة الفائقة</div>
+                        <div class="package-price">3$ <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">12</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">16384 MB</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> استجابة عالية</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> سرعة في التنفيذ</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> تحميل مكتبات سريع</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> دعم فني 12/7</div>
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button">اشترك الآن</a>
+                    </div>
+                </div>
+                
+                <!-- الحزمة الشهرية الكاملة -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">الحزمة الشهرية الكاملة</div>
+                        <div class="package-price">5$ <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">12</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">20480 MB</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> باقة 𝐮𝐧𝐥𝐢𝐦𝐢𝐭𝐞𝐝</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> تشمل جميع مميزات باقي الباقات</div>
+                        <div class="feature-item"><i class="fas fa-check-circle"></i> حماية، دعم، سرعة</div>
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button gold">الباقة الشاملة</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تصميم الهاتف -->
+            <div class="packages-slider mobile" id="mobilePackages" style="display: none;">
+                <div class="slider-wrapper" id="sliderWrapper">
+                    <!-- سيتم إضافة الباقات عن طريق JavaScript -->
+                </div>
+                
+                <div class="slider-controls">
+                    <div class="slider-btn" id="prevBtn"><i class="fas fa-chevron-right"></i></div>
+                    <div class="slider-dots" id="sliderDots"></div>
+                    <div class="slider-btn" id="nextBtn"><i class="fas fa-chevron-left"></i></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Contact Section with Telegram Buttons -->
+        <section class="quick-contact" id="quick-contact">
+            <h2>تواصل مباشر مع فريق الدعم</h2>
+            <p>اضغط على الزر للتواصل المباشر عبر تليجرام أو واتساب</p>
+            
+            <!-- تصميم الحاسوب -->
+            <div class="contact-buttons desktop" id="desktopContact">
+                <a href="https://t.me/qbk15" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                    <div>تواصل مع CORCO</div>
+                    <div class="contact-name">@qbk15</div>
+                </a>
+                
+                <a href="https://t.me/Y_may99" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                    <div>تواصل مع MAY</div>
+                    <div class="contact-name">@Y_may99</div>
+                </a>
+                
+                <a href="https://wa.me/+201031792409" class="telegram-btn whatsapp-btn" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>واتساب CORCO</div>
+                    <div class="contact-name">+201031792409</div>
+                </a>
+                
+                <a href="https://wa.me/+201110016121" class="telegram-btn whatsapp-btn" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>واتساب MAY</div>
+                    <div class="contact-name">+201110016121</div>
+                </a>
+            </div>
+            
+            <!-- تصميم الهاتف -->
+            <div class="contact-buttons mobile" id="mobileContact" style="display: none;">
+                <a href="https://t.me/qbk15" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                    <div>تواصل مع CORCO</div>
+                    <div class="contact-name">@qbk15</div>
+                </a>
+                
+                <a href="https://t.me/Y_may99" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                    <div>تواصل مع MAY</div>
+                    <div class="contact-name">@Y_may99</div>
+                </a>
+                
+                <a href="https://wa.me/+201031792409" class="telegram-btn whatsapp-btn" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>واتساب CORCO</div>
+                    <div class="contact-name">+201031792409</div>
+                </a>
+                
+                <a href="https://wa.me/+201110016121" class="telegram-btn whatsapp-btn" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>واتساب MAY</div>
+                    <div class="contact-name">+201110016121</div>
+                </a>
+            </div>
+        </section>
+
+        <section class="contact" id="contact">
+            <h2>معلومات الاتصال</h2>
+            <div class="avast-border">──◆𝐀𝐕𝐀𝐒𝐓◆──━──────────</div>
+            
+            <!-- تصميم الحاسوب -->
+            <div class="contact-container desktop" id="desktopContactContainer">
+                <div class="contact-card">
+                    <h3>فريق الدعم</h3>
+                    <div class="contact-person">
+                        <div class="person-name">𝐂𝐎𝐑𝐂𝐎 • 𝓜</div>
+                        <div class="person-contact">
+                            <i class="fab fa-telegram"></i>
+                            <span>تيليجرام : @qbk15</span>
+                        </div>
+                        <div class="person-contact">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>واتساب : +201031792409</span>
+                        </div>
+                    </div>
+                    <div class="contact-person">
+                        <div class="person-name">𝐌𝐀𝐘 • 𝓜</div>
+                        <div class="person-contact">
+                            <i class="fab fa-telegram"></i>
+                            <span>تيليجرام : @Y_may99</span>
+                        </div>
+                        <div class="person-contact">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>واتساب: +201110016121</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-card">
+                    <h3>طرق الدفع المتاحة</h3>
+                    <div class="payment-methods">
+                        <div class="payment-item">𝐕𝐨𝐝𝐚𝐟𝐨𝐧 𝐂𝐚𝐬𝐡</div>
+                        <div class="payment-item">𝐈𝐧𝐬𝐭𝐚 𝐩𝐚𝐲 (قريباً)</div>
+                        <div class="payment-item">𝐑𝐨𝐛𝐨𝐥</div>
+                    </div>
+                    <div class="avast-border">╭──────━──◆𝐀𝐕𝐀𝐒𝐓◆──━──────╮</div>
+                    <p style="margin: 1.5rem 0;">نحن في انتظارك للانضمام إلى عائلة افاست</p>
+                    <div class="avast-border">╰──────━──◆𝐀𝐕𝐀𝐒𝐓◆──━──────╯</div>
+                </div>
+            </div>
+            
+            <!-- تصميم الهاتف -->
+            <div class="contact-container mobile" id="mobileContactContainer" style="display: none;">
+                <div class="contact-card">
+                    <h3>فريق الدعم</h3>
+                    <div class="contact-person">
+                        <div class="person-name">𝐂𝐎𝐑𝐂𝐎 • 𝓜</div>
+                        <div class="person-contact">
+                            <i class="fab fa-telegram"></i>
+                            <span>تيليجرام : @qbk15</span>
+                        </div>
+                        <div class="person-contact">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>واتساب : +201031792409</span>
+                        </div>
+                    </div>
+                    <div class="contact-person">
+                        <div class="person-name">𝐌𝐀𝐘 • 𝓜</div>
+                        <div class="person-contact">
+                            <i class="fab fa-telegram"></i>
+                            <span>تيليجرام : @Y_may99</span>
+                        </div>
+                        <div class="person-contact">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>واتساب: +201110016121</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-card">
+                    <h3>طرق الدفع المتاحة</h3>
+                    <div class="payment-methods">
+                        <div class="payment-item">𝐕𝐨𝐝𝐚𝐟𝐨𝐧 𝐂𝐚𝐬𝐡</div>
+                        <div class="payment-item">𝐈𝐧𝐬𝐭𝐚 𝐩𝐚𝐲 (قريباً)</div>
+                        <div class="payment-item">𝐑𝐨𝐛𝐨𝐥</div>
+                    </div>
+                    <div class="avast-border">╭──────━──◆𝐀𝐕𝐀𝐒𝐓◆──━──────╮</div>
+                    <p style="margin: 1.5rem 0;">نحن في انتظارك للانضمام إلى عائلة افاست</p>
+                    <div class="avast-border">╰──────━──◆𝐀𝐕𝐀𝐒𝐓◆──━──────╯</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="avast-banner">
+                <h3>افاست AVAST</h3>
+                <p>منصة الحماية والأداء المميزة - نضمن لك تجربة فريدة وأداءً استثنائياً</p>
+            </div>
+            <p>© 2025 منصة افاست AVAST. جميع الحقوق محفوظة.</p>
+            <div class="social-icons">
+                <a href="https://t.me/qbk15" target="_blank"><i class="fab fa-telegram"></i></a>
+                <a href="https://wa.me/+201031792409" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // بيانات الباقات
+        const packages = [
+            {
+                name: "الباقة العادية",
+                price: "1.5$",
+                core: 2,
+                memory: "4096 MB",
+                features: ["استجابة عالية", "سرعة في التنفيذ"],
+                featured: false
+            },
+            {
+                name: "الباقة الفضية",
+                price: "2$",
+                core: 4,
+                memory: "8192 MB",
+                features: ["استجابة عالية", "سرعة في التنفيذ"],
+                featured: false
+            },
+            {
+                name: "الباقة الذهبية",
+                price: "2.55$",
+                core: 8,
+                memory: "12288 MB",
+                features: ["استجابة عالية", "سرعة في التنفيذ", "دعم فني على مدار اليوم"],
+                featured: true
+            },
+            {
+                name: "الباقة الفائقة",
+                price: "3$",
+                core: 12,
+                memory: "16384 MB",
+                features: ["استجابة عالية", "سرعة في التنفيذ", "تحميل مكتبات سريع", "دعم فني 12/7"],
+                featured: false
+            },
+            {
+                name: "الحزمة الشهرية الكاملة",
+                price: "5$",
+                core: 12,
+                memory: "20480 MB",
+                features: ["باقة 𝐮𝐧𝐥𝐢𝐦𝐢𝐭𝐞𝐝", "تشمل جميع مميزات باقي الباقات", "حماية، دعم، سرعة"],
+                featured: false
+            }
+        ];
+
+        // اختيار الجهاز
+        function selectDevice(deviceType) {
+            const deviceSelection = document.getElementById('device-selection');
+            const mainContent = document.getElementById('main-content');
+            const viewToggle = document.getElementById('viewToggle');
+            const body = document.body;
+            
+            // حفظ التفضيل
+            localStorage.setItem('avast-device-preference', deviceType);
+            
+            // إخفاء شاشة الاختيار
+            deviceSelection.style.display = 'none';
+            
+            // عرض المحتوى الرئيسي
+            mainContent.style.display = 'block';
+            
+            // عرض زر التبديل
+            viewToggle.style.display = 'flex';
+            
+            // تحديد نوع العرض
+            if (deviceType === 'auto') {
+                // كشف تلقائي للجهاز
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    showMobileView();
+                } else {
+                    showDesktopView();
+                }
+            } else if (deviceType === 'mobile') {
+                showMobileView();
+            } else {
+                showDesktopView();
+            }
+        }
+
+        // عرض تصميم الهاتف
+        function showMobileView() {
+            const body = document.body;
+            const viewToggle = document.getElementById('viewToggle');
+            
+            body.classList.remove('desktop-view');
+            body.classList.add('mobile-view');
+            
+            viewToggle.innerHTML = '<i class="fas fa-desktop"></i><span>عرض كمبيوتر</span>';
+            
+            // إخفاء تصميم الحاسوب وإظهار تصميم الهاتف
+            document.getElementById('desktopPackages').style.display = 'none';
+            document.getElementById('mobilePackages').style.display = 'block';
+            document.getElementById('desktopContact').style.display = 'none';
+            document.getElementById('mobileContact').style.display = 'flex';
+            document.getElementById('desktopContactContainer').style.display = 'none';
+            document.getElementById('mobileContactContainer').style.display = 'flex';
+            
+            // إنشاء السلايدر للهاتف
+            initMobileSlider();
+        }
+
+        // عرض تصميم الحاسوب
+        function showDesktopView() {
+            const body = document.body;
+            const viewToggle = document.getElementById('viewToggle');
+            
+            body.classList.remove('mobile-view');
+            body.classList.add('desktop-view');
+            
+            viewToggle.innerHTML = '<i class="fas fa-mobile-alt"></i><span>عرض هاتف</span>';
+            
+            // إخفاء تصميم الهاتف وإظهار تصميم الحاسوب
+            document.getElementById('desktopPackages').style.display = 'grid';
+            document.getElementById('mobilePackages').style.display = 'none';
+            document.getElementById('desktopContact').style.display = 'grid';
+            document.getElementById('mobileContact').style.display = 'none';
+            document.getElementById('desktopContactContainer').style.display = 'grid';
+            document.getElementById('mobileContactContainer').style.display = 'none';
+        }
+
+        // تهيئة السلايدر للهاتف
+        function initMobileSlider() {
+            const sliderWrapper = document.getElementById('sliderWrapper');
+            const sliderDots = document.getElementById('sliderDots');
+            
+            // تفريغ المحتوى الحالي
+            sliderWrapper.innerHTML = '';
+            sliderDots.innerHTML = '';
+            
+            // إنشاء الباقات في السلايدر
+            packages.forEach((pkg, index) => {
+                // إنشاء البطاقة
+                const card = document.createElement('div');
+                card.className = 'package-card';
+                card.style.minWidth = 'calc(100% - 2rem)';
+                card.style.margin = '0 1rem';
+                
+                if (pkg.featured) {
+                    card.classList.add('featured');
+                }
+                
+                card.innerHTML = `
+                    <div class="package-header">
+                        <div class="package-name">${pkg.name}</div>
+                        <div class="package-price">${pkg.price} <span class="currency">/ كاش</span></div>
+                    </div>
+                    <div class="package-specs">
+                        <div class="spec-item">
+                            <span class="spec-label">النوايا (Core)</span>
+                            <span class="spec-value">${pkg.core}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">الذاكرة (Memory)</span>
+                            <span class="spec-value">${pkg.memory}</span>
+                        </div>
+                    </div>
+                    <div class="package-features">
+                        ${pkg.features.map(feature => `<div class="feature-item"><i class="fas fa-check-circle"></i> ${feature}</div>`).join('')}
+                    </div>
+                    <div class="package-button">
+                        <a href="#quick-contact" class="cta-button ${pkg.featured ? 'gold' : ''}">${pkg.featured ? 'الخيار المثالي' : 'اشترك الآن'}</a>
+                    </div>
+                `;
+                
+                sliderWrapper.appendChild(card);
+                
+                // إنشاء النقاط
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(index));
+                sliderDots.appendChild(dot);
+            });
+            
+            // تهيئة متغيرات السلايدر
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.packages-slider.mobile .package-card');
+            const dots = document.querySelectorAll('.packages-slider.mobile .dot');
+            
+            // إضافة أحداث للأزرار
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlider();
+                }
+            });
+            
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    updateSlider();
+                }
+            });
+            
+            // تحديث السلايدر
+            function updateSlider() {
+                const cardWidth = slides[0].offsetWidth + 32; // عرض البطاقة + الهوامش
+                sliderWrapper.style.transform = `translateX(-${currentSlide * cardWidth}px)`;
+                
+                // تحديث النقاط
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+            }
+            
+            function goToSlide(slideIndex) {
+                currentSlide = slideIndex;
+                updateSlider();
+            }
+            
+            // تحديث السلايدر عند تغيير حجم النافذة
+            window.addEventListener('resize', updateSlider);
+        }
+
+        // عند تحميل الصفحة، التحقق من التفضيلات السابقة
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedPreference = localStorage.getItem('avast-device-preference');
+            
+            // إذا كان هناك تفضيل سابق، نستخدمه تلقائياً
+            if (savedPreference) {
+                selectDevice(savedPreference);
+            }
+            
+            // زر تبديل العرض
+            document.getElementById('viewToggle').addEventListener('click', () => {
+                const body = document.body;
+                if (body.classList.contains('mobile-view')) {
+                    showDesktopView();
+                    localStorage.setItem('avast-device-preference', 'desktop');
+                } else {
+                    showMobileView();
+                    localStorage.setItem('avast-device-preference', 'mobile');
+                }
+            });
+            
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                    menuToggle.innerHTML = navMenu.classList.contains('active') 
+                        ? '<i class="fas fa-times"></i>' 
+                        : '<i class="fas fa-bars"></i>';
+                });
+            }
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (navMenu && menuToggle) {
+                    if (!navMenu.contains(e.target) && !menuToggle.contains(e.target) && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                    }
+                }
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if(targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        // Close mobile menu if open
+                        if (navMenu && navMenu.classList.contains('active')) {
+                            navMenu.classList.remove('active');
+                            if (menuToggle) {
+                                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                            }
+                        }
+                        
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Highlight current section in navigation
+            window.addEventListener('scroll', function() {
+                const sections = document.querySelectorAll('section, .intro');
+                const navLinks = document.querySelectorAll('nav ul li a');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if(scrollY >= (sectionTop - 150)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+            
+            // Add hover effects to package cards
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Telegram button animation
+            document.querySelectorAll('.telegram-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
